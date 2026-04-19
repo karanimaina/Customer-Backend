@@ -63,7 +63,11 @@ Configurable approval defaults:
 - **Domain model** maps to the ERD: `Customer`, `KycDocument`, `CreditProfile`, `CreditHistory`, `CustomerSegment`, `PaymentSummary`, `LoanLimitAdjustment`.
 - **Flowchart**: registration validation → `PENDING` + score 0 → document upload → submit for review → approve/reject → notifications on each transition.
 - **REST + WebFlux**: JPA calls run on `Schedulers.boundedElastic()` from controllers.
-- **Testing**: `./mvnw test` (includes Mockito unit tests and a Spring context smoke test).
+- **Testing**: run `./mvnw test`. The suite includes:
+  - **Unit tests** (`CustomerApplicationServiceUnitTest`): Mockito-based tests for registration, lookups, and KYC approval rules without starting HTTP or a real DB.
+  - **Integration tests** (`CustomerApiIntegrationTest`): full Spring context + real Netty port; `WebTestClient` exercises register/get and error responses.
+  - **Service integration** (`ApproveKycFlowTest`): transactional test against H2 for register → KYC doc → submit → approve.
+  - **Smoke** (`CustomerBackendApplicationTests`): application context loads.
 
 ## Case study alignment
 

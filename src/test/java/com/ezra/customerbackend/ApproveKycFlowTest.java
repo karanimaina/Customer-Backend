@@ -9,6 +9,7 @@ import com.ezra.customerbackend.repository.CustomerRepository;
 import com.ezra.customerbackend.repository.KycDocumentRepository;
 import com.ezra.customerbackend.service.CustomerApplicationService;
 import com.ezra.customerbackend.dto.RegisterCustomerRequest;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 
 @SpringBootTest
 @Transactional
+@DisplayName("KYC approve flow (service + JPA + H2)")
 class ApproveKycFlowTest {
 
     @Autowired
@@ -32,6 +34,7 @@ class ApproveKycFlowTest {
     KycDocumentRepository kycDocumentRepository;
 
     @Test
+    @DisplayName("register → national ID doc → submit → approve completes without error")
     void approveKyc_fullFlow() {
         var reg = new RegisterCustomerRequest(
                 "A", "B", "nid-flow-1", "flow@b.com", "+19990002", PreferredChannel.EMAIL);
