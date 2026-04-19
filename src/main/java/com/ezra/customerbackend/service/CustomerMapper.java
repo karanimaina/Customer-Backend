@@ -1,11 +1,11 @@
 package com.ezra.customerbackend.service;
 
-import com.ezra.customerbackend.model.CreditProfile;
-import com.ezra.customerbackend.model.Customer;
-import com.ezra.customerbackend.model.KycDocument;
 import com.ezra.customerbackend.dto.CreditProfileResponse;
 import com.ezra.customerbackend.dto.CustomerResponse;
 import com.ezra.customerbackend.dto.KycDocumentResponse;
+import com.ezra.customerbackend.model.CreditProfile;
+import com.ezra.customerbackend.model.Customer;
+import com.ezra.customerbackend.model.KycDocument;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j

@@ -2,13 +2,7 @@ package com.ezra.customerbackend.model;
 
 import com.ezra.customerbackend.enums.CreditHistoryEventType;
 import com.ezra.customerbackend.enums.HistoryOutcome;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Instant;
