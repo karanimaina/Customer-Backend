@@ -1,0 +1,44 @@
+server:
+  port: 8081
+spring:
+  application:
+    name: Customer-Backend
+  codec:
+    max-in-memory-size: 16MB
+  cloud:
+    stream:
+      default-binder: kafka
+      kafka:
+        binder:
+          auto-create-topics: true
+          brokers: ${KAFKA_BOOTSTRAP_SERVER:localhost:9092}
+      bindings:
+        notification-request-out-0:
+          destination: notifications
+        customer-notifications-out-0:
+          destination: customer-notifications
+
+  datasource:
+    url: jdbc:h2:file:./data/mydb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: Africa/Nairobi
+
+eureka:
+  client:
+    enabled: false
+
+customer:
+  kyc:
+    approved-credit-limit: 5000
+    approved-credit-score: 620
+
