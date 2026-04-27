@@ -1,6 +1,9 @@
 package com.ezra.customerbackend.service;
 
 import com.ezra.customerbackend.dto.*;
+import com.ezra.customerbackend.dto.CreditProfile;
+import com.ezra.customerbackend.dto.Customer;
+import com.ezra.customerbackend.dto.KycDocument;
 import com.ezra.customerbackend.enums.*;
 import com.ezra.customerbackend.exceptions.CustomerException;
 import com.ezra.customerbackend.model.*;
@@ -45,7 +48,7 @@ public class CustomerApplicationService {
     private int approvedCreditScore;
 
     @Transactional(readOnly = true)
-    public CustomerResponse getCustomer(Long id) {
+    public Customer getCustomer(Long id) {
         return CustomerMapper.toCustomerResponse(loadCustomer(id));
     }
 
@@ -54,10 +57,10 @@ public class CustomerApplicationService {
      */
     @Transactional
 
-    public CustomerResponse register(RegisterCustomerRequest request) {
+    public Customer register(RegisterCustomerRequest request) {
         log.info("Registering customer: {}", request);
         validateUniqueIdentifiers(request.nationalId(), request.email(), request.phoneNumber());
-        Customer customer = Customer.builder()
+        com.ezra.customerbackend.model.Customer customer = com.ezra.customerbackend.model.Customer.builder()
                 .firstName(request.firstName().trim())
                 .lastName(request.lastName().trim())
                 .nationalId(request.nationalId().trim())
@@ -70,7 +73,7 @@ public class CustomerApplicationService {
                 .build();
 
         Double DOUBLE_VALUE = 0.00;
-        CreditProfile profile = CreditProfile.builder()
+        com.ezra.customerbackend.model.CreditProfile profile = com.ezra.customerbackend.model.CreditProfile.builder()
                 .customer(customer)
                 .creditLimit(DOUBLE_VALUE)
                 .outstandingBalance(DOUBLE_VALUE)
@@ -81,7 +84,7 @@ public class CustomerApplicationService {
                 .build();
         log.info("Created credit profile: {}", profile);
         customer.setCreditProfile(profile);
-        Customer saved = customerRepository.save(customer);
+        com.ezra.customerbackend.model.Customer saved = customerRepository.save(customer);
         log.info("Saved customer: {}", saved);
         recordHistory(saved, CreditHistoryEventType.ACCOUNT_REGISTERED, HistoryOutcome.SUCCESS, null);
         publish(saved.getId(), "CUSTOMER_REGISTERED", "Account created; status PENDING; credit score 0.");
@@ -89,15 +92,15 @@ public class CustomerApplicationService {
     }
 
     @Transactional
-    public KycDocumentResponse uploadKycDocument(Long customerId,
-                                                 KycDocumentType documentType,
-                                                 FilePart file) {
+    public KycDocument uploadKycDocument(Long customerId,
+                                         KycDocumentType documentType,
+                                         FilePart file) {
         log.info("Uploading KYC document for customer {}: {}", customerId, documentType);
-        Customer customer = loadCustomer(customerId);
+        com.ezra.customerbackend.model.Customer customer = loadCustomer(customerId);
         validateKycState(customer);
         String filePath = storeFile(customerId, file);
         log.info("Stored file at: {}", filePath);
-        KycDocument doc = new KycDocument();
+        com.ezra.customerbackend.model.KycDocument doc = new com.ezra.customerbackend.model.KycDocument();
         doc.setCustomer(customer);
         doc.setDocumentType(documentType);
         doc.setFileReference(filePath); // ✅ store path
@@ -110,7 +113,7 @@ public class CustomerApplicationService {
             customer.setKycStatus("NATIONAL_ID_RECEIVED");
         }
         log.info("Updated customer's KYC status: {}", customer.getKycStatus());
-        KycDocument saved = kycDocumentRepository.save(doc);
+        com.ezra.customerbackend.model.KycDocument saved = kycDocumentRepository.save(doc);
         log.info("Saved KYC document: {}", saved);
         publish(customerId, "KYC_DOCUMENT_UPLOADED",
                 "Document uploaded: " + documentType);
@@ -118,7 +121,7 @@ public class CustomerApplicationService {
         return CustomerMapper.toKycResponse(saved);
     }
 
-    public void validateKycState(Customer customer) {
+    public void validateKycState(com.ezra.customerbackend.model.Customer customer) {
         log.info("Validating KYC state for customer: {}", customer);
         if (customer.getStatus() == CustomerStatus.LOAN_READY) {
             log.info("Customer is already LOAN_READY; cannot upload more documents.");
@@ -156,9 +159,9 @@ public class CustomerApplicationService {
     }
 
     @Transactional
-    public CustomerResponse submitKycForReview(Long customerId) {
+    public Customer submitKycForReview(Long customerId) {
         log.info("Submitting KYC for review for customer: {}", customerId);
-        Customer customer = loadCustomer(customerId);
+        com.ezra.customerbackend.model.Customer customer = loadCustomer(customerId);
         if (customer.getStatus() != CustomerStatus.PENDING) {
             log.info("Customer is not in PENDING state; cannot submit KYC.");
             throw new CustomerException(HttpStatus.CONFLICT, "Customer must be in PENDING state to submit KYC.");
@@ -186,8 +189,8 @@ public class CustomerApplicationService {
     }
 
     @Transactional
-    public CustomerResponse approveKyc(Long customerId, String reviewer) {
-        Customer customer = loadCustomer(customerId);
+    public Customer approveKyc(Long customerId, String reviewer) {
+        com.ezra.customerbackend.model.Customer customer = loadCustomer(customerId);
         log.info("Approving KYC for customer: {}", customerId);
         if (customer.getStatus() != CustomerStatus.KYC_UNDER_REVIEW) {
             log.info("Customer is not in KYC_UNDER_REVIEW state; cannot approve KYC.");
@@ -201,7 +204,7 @@ public class CustomerApplicationService {
             }
         });
       log.info("KYC documents marked as verified: {}", customer.getKycDocuments());
-        CreditProfile profile = Objects.requireNonNull(customer.getCreditProfile(), "Credit profile missing");
+        com.ezra.customerbackend.model.CreditProfile profile = Objects.requireNonNull(customer.getCreditProfile(), "Credit profile missing");
         double previousLimit = profile.getCreditLimit() == null ? 0d : profile.getCreditLimit();
         profile.setCreditScore(approvedCreditScore);
         profile.setCreditLimit(approvedCreditLimit);
@@ -238,9 +241,9 @@ public class CustomerApplicationService {
     }
 
     @Transactional
-    public CustomerResponse rejectKyc(Long customerId, KycRejectRequest request) {
+    public Customer rejectKyc(Long customerId, KycRejectRequest request) {
         log.info("Rejecting KYC for customer: {}", customerId);
-        Customer customer = loadCustomer(customerId);
+        com.ezra.customerbackend.model.Customer customer = loadCustomer(customerId);
         if (customer.getStatus() != CustomerStatus.KYC_UNDER_REVIEW) {
             log.info("Customer is not in KYC_UNDER_REVIEW state; cannot reject KYC.");
             throw new CustomerException(HttpStatus.CONFLICT, "KYC is not under review.");
@@ -254,7 +257,7 @@ public class CustomerApplicationService {
                     d.setRejectionReason(reason);
                 });
         log.info("KYC documents marked as rejected: {}", customer.getKycDocuments());
-        CreditProfile profile = customer.getCreditProfile();
+        com.ezra.customerbackend.model.CreditProfile profile = customer.getCreditProfile();
         if (profile != null) {
             profile.setRejectionReason(reason);
         }
@@ -269,7 +272,7 @@ public class CustomerApplicationService {
     }
 
     @Transactional(readOnly = true)
-    public List<KycDocumentResponse> listKycDocuments(Long customerId) {
+    public List<KycDocument> listKycDocuments(Long customerId) {
         loadCustomer(customerId);
         log.info("Listing KYC documents for customer: {}", customerId);
         return kycDocumentRepository.findByCustomerId(customerId).stream()
@@ -278,13 +281,13 @@ public class CustomerApplicationService {
     }
 
     @Transactional(readOnly = true)
-    public CreditProfileResponse getCreditProfile(Long customerId) {
+    public CreditProfile getCreditProfile(Long customerId) {
         log.info("Retrieving credit profile for customer: {}", customerId);
-        Customer customer = loadCustomer(customerId);
+        com.ezra.customerbackend.model.Customer customer = loadCustomer(customerId);
         log.info("Loaded customer: {}", customer);
-        CreditProfile profile = Objects.requireNonNull(customer.getCreditProfile(), "Credit profile missing");
+        com.ezra.customerbackend.model.CreditProfile profile = Objects.requireNonNull(customer.getCreditProfile(), "Credit profile missing");
         log.info("Loaded credit profile: {}", profile);
-        return new CreditProfileResponse(
+        return new CreditProfile(
                 profile.getId(),
                 profile.getCreditLimit(),
                 profile.getOutstandingBalance(),
@@ -295,7 +298,7 @@ public class CustomerApplicationService {
         );
     }
 
-    private Customer loadCustomer(Long id) {
+    private com.ezra.customerbackend.model.Customer loadCustomer(Long id) {
         log.info("Loading customer: {}", id);
         return customerRepository.findById(id)
                 .orElseThrow(() -> new CustomerException(HttpStatus.NOT_FOUND, "Customer not found"));
@@ -330,7 +333,7 @@ public class CustomerApplicationService {
         return t.isEmpty() ? null : t;
     }
 
-    private void recordHistory(Customer customer, CreditHistoryEventType type, HistoryOutcome outcome, Double amount) {
+    private void recordHistory(com.ezra.customerbackend.model.Customer customer, CreditHistoryEventType type, HistoryOutcome outcome, Double amount) {
         log.info("Recording history for customer {}: type={}, outcome={}, amount={}", customer.getId(), type, outcome, amount);
         CreditHistory history = new CreditHistory();
         history.setCustomer(customer);

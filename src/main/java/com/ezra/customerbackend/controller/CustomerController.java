@@ -3,7 +3,7 @@ package com.ezra.customerbackend.controller;
 import com.ezra.customerbackend.dto.*;
 import com.ezra.customerbackend.enums.KycDocumentType;
 import com.ezra.customerbackend.service.CustomerApplicationService;
-import com.ezra.customerbackend.web.response.ApiResponse;
+import com.ezra.customerbackend.dto.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -25,7 +25,7 @@ public class CustomerController {
     private final CustomerApplicationService customerApplicationService;
 
     @PostMapping("/register")
-    public Mono<ResponseEntity<ApiResponse<CustomerResponse>>> register(@Valid @RequestBody RegisterCustomerRequest request) {
+    public Mono<ResponseEntity<ApiResponse<Customer>>> register(@Valid @RequestBody RegisterCustomerRequest request) {
         return Mono.fromCallable(() -> customerApplicationService.register(request))
                 .subscribeOn(Schedulers.boundedElastic())
                 .map(data -> ResponseEntity.status(HttpStatus.CREATED)
@@ -33,25 +33,21 @@ public class CustomerController {
     }
 
     @GetMapping("/{id}")
-    public Mono<ResponseEntity<ApiResponse<CustomerResponse>>> get(@PathVariable Long id) {
+    public Mono<ResponseEntity<ApiResponse<Customer>>> get(@PathVariable Long id) {
         return Mono.fromCallable(() -> customerApplicationService.getCustomer(id))
                 .subscribeOn(Schedulers.boundedElastic())
                 .map(data -> ResponseEntity.ok(ApiResponse.ok("Customer retrieved successfully", data)));
     }
 
     @GetMapping("/{id}/credit-profile")
-    public Mono<ResponseEntity<ApiResponse<CreditProfileResponse>>> creditProfile(@PathVariable Long id) {
+    public Mono<ResponseEntity<ApiResponse<CreditProfile>>> creditProfile(@PathVariable Long id) {
         return Mono.fromCallable(() -> customerApplicationService.getCreditProfile(id))
                 .subscribeOn(Schedulers.boundedElastic())
                 .map(data -> ResponseEntity.ok(ApiResponse.ok("Credit profile retrieved successfully", data)));
     }
 
-    /**
-     * Multipart upload for WebFlux: use {@link FilePart}, not servlet {@code MultipartFile}.
-     * Example: {@code curl -F "documentType=NATIONAL_ID" -F "file=@/path/to/id.jpg" ...}
-     */
     @PostMapping(value = "/{id}/kyc/documents", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public Mono<ResponseEntity<ApiResponse<KycDocumentResponse>>> uploadKyc(
+    public Mono<ResponseEntity<ApiResponse<KycDocument>>> uploadKyc(
             @PathVariable Long id,
             @RequestPart("documentType") String documentType,
             @RequestPart("file") FilePart file) {
@@ -70,24 +66,22 @@ public class CustomerController {
     }
 
     @GetMapping("/{custmerid}/list/kyc/documents")
-    public Mono<ResponseEntity<ApiResponse<List<KycDocumentResponse>>>> listKyc(@PathVariable Long custmerid) {
+    public Mono<ResponseEntity<ApiResponse<List<KycDocument>>>> listKyc(@PathVariable Long custmerid) {
         return Mono.fromCallable(() -> customerApplicationService.listKycDocuments(custmerid))
                 .subscribeOn(Schedulers.boundedElastic())
                 .map(data -> ResponseEntity.ok(ApiResponse.ok("KYC documents retrieved successfully", data)));
     }
 
     @PostMapping("/{customerid}/kyc/submit")
-    public Mono<ResponseEntity<ApiResponse<CustomerResponse>>> submitKyc(@PathVariable Long customerid) {
+    public Mono<ResponseEntity<ApiResponse<Customer>>> submitKyc(@PathVariable Long customerid) {
         return Mono.fromCallable(() -> customerApplicationService.submitKycForReview(customerid))
                 .subscribeOn(Schedulers.boundedElastic())
                 .map(data -> ResponseEntity.ok(ApiResponse.ok("KYC submitted for review successfully", data)));
     }
 
-    /**
-     * Operations typically restricted to back-office / internal services (KYC review on flowchart).
-     */
+
     @PostMapping("/{customerid}/kyc/approve")
-    public Mono<ResponseEntity<ApiResponse<CustomerResponse>>> approveKyc(
+    public Mono<ResponseEntity<ApiResponse<Customer>>> approveKyc(
             @PathVariable Long customerid,
             @RequestHeader(value = "X-Reviewer", defaultValue = "system") String reviewer) {
         return Mono.fromCallable(() -> customerApplicationService.approveKyc(customerid, reviewer))
@@ -96,7 +90,7 @@ public class CustomerController {
     }
 
     @PostMapping("/{id}/kyc/reject")
-    public Mono<ResponseEntity<ApiResponse<CustomerResponse>>> rejectKyc(
+    public Mono<ResponseEntity<ApiResponse<Customer>>> rejectKyc(
             @PathVariable Long id,
             @Valid @RequestBody KycRejectRequest request) {
         return Mono.fromCallable(() -> customerApplicationService.rejectKyc(id, request))

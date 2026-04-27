@@ -5,7 +5,7 @@ import com.ezra.customerbackend.enums.KycVerificationStatus;
 
 import java.time.Instant;
 
-public record KycDocumentResponse(
+public record KycDocument(
         Long id,
         KycDocumentType documentType,
         String fileReference,

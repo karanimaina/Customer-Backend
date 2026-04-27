@@ -5,7 +5,7 @@ import com.ezra.customerbackend.enums.PreferredChannel;
 
 import java.time.Instant;
 
-public record CustomerResponse(
+public record Customer(
         Long id,
         String firstName,
         String lastName,
@@ -16,6 +16,6 @@ public record CustomerResponse(
         CustomerStatus status,
         PreferredChannel preferredChannel,
         Instant registeredAt,
-        CreditProfileResponse creditProfile
+        CreditProfile creditProfile
 ) {
 }

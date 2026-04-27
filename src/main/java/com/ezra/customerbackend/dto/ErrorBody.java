@@ -1,4 +1,4 @@
-package com.ezra.customerbackend.web.response;
+package com.ezra.customerbackend.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
@@ -18,6 +18,4 @@ public record ErrorBody(
                 violations == null || violations.isEmpty() ? null : List.copyOf(violations));
     }
 
-    public record FieldViolation(String field, String message) {
-    }
 }

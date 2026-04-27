@@ -1,4 +1,4 @@
-package com.ezra.customerbackend.web.response;
+package com.ezra.customerbackend.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.springframework.http.HttpStatus;

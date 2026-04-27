@@ -15,8 +15,7 @@ spring:
       bindings:
         notification-request-out-0:
           destination: notifications
-        customer-notifications-out-0:
-          destination: customer-notifications
+
 
   datasource:
     url: jdbc:h2:file:./data/mydb
@@ -36,7 +35,10 @@ spring:
 eureka:
   client:
     enabled: false
-
+logging:
+  level:
+    org.apache.kafka: ERROR
+    org.springframework.kafka: ERROR
 customer:
   kyc:
     approved-credit-limit: 5000

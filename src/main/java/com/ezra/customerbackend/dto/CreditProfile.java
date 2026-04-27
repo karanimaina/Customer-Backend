@@ -5,7 +5,7 @@ import com.ezra.customerbackend.enums.SegmentType;
 
 import java.time.Instant;
 
-public record CreditProfileResponse(
+public record CreditProfile(
         Long id,
         Double creditLimit,
         Double outstandingBalance,

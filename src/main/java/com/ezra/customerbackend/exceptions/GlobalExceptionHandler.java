@@ -1,7 +1,8 @@
 package com.ezra.customerbackend.exceptions;
 
-import com.ezra.customerbackend.web.response.ApiResponse;
-import com.ezra.customerbackend.web.response.ErrorBody;
+import com.ezra.customerbackend.dto.ApiResponse;
+import com.ezra.customerbackend.dto.ErrorBody;
+import com.ezra.customerbackend.dto.FieldViolation;
 import jakarta.annotation.Nullable;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
@@ -18,9 +19,7 @@ import reactor.core.publisher.Mono;
 import java.time.Instant;
 import java.util.List;
 
-/**
- * Maps exceptions to {@link ApiResponse} with {@link ErrorBody} in {@code data} (no stack traces).
- */
+
 @Slf4j
 @Order(-2)
 @RestControllerAdvice
@@ -47,13 +46,13 @@ public class GlobalExceptionHandler {
     public Mono<ResponseEntity<ApiResponse<ErrorBody>>> handleValidation(WebExchangeBindException ex,
                                                                          ServerWebExchange exchange) {
         HttpStatus status = HttpStatus.BAD_REQUEST;
-        List<ErrorBody.FieldViolation> violations = ex.getBindingResult().getAllErrors().stream()
+        List<FieldViolation> violations = ex.getBindingResult().getAllErrors().stream()
                 .map(err -> {
                     String field = err instanceof org.springframework.validation.FieldError fe
                             ? fe.getField()
                             : err.getObjectName();
                     String msg = err.getDefaultMessage() != null ? err.getDefaultMessage() : err.getCode();
-                    return new ErrorBody.FieldViolation(field, msg);
+                    return new FieldViolation(field, msg);
                 })
                 .toList();
         String message = "Validation failed";
@@ -86,7 +85,7 @@ public class GlobalExceptionHandler {
     }
 
     private static ErrorBody errorBody(ServerWebExchange exchange, String code,
-                                       @Nullable List<ErrorBody.FieldViolation> violations) {
+                                       @Nullable List<FieldViolation> violations) {
         return ErrorBody.of(code, Instant.now(), exchange.getRequest().getPath().value(), violations);
     }
 

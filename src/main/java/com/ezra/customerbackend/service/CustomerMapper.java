@@ -1,22 +1,15 @@
 package com.ezra.customerbackend.service;
 
-import com.ezra.customerbackend.dto.CreditProfileResponse;
-import com.ezra.customerbackend.dto.CustomerResponse;
-import com.ezra.customerbackend.dto.KycDocumentResponse;
-import com.ezra.customerbackend.model.CreditProfile;
-import com.ezra.customerbackend.model.Customer;
-import com.ezra.customerbackend.model.KycDocument;
+import com.ezra.customerbackend.dto.CreditProfile;
+import com.ezra.customerbackend.dto.Customer;
+import com.ezra.customerbackend.dto.KycDocument;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public final class CustomerMapper {
-
-    private CustomerMapper() {
-    }
-
-    public static CustomerResponse toCustomerResponse(Customer customer) {
+    public static Customer toCustomerResponse(com.ezra.customerbackend.model.Customer customer) {
         log.debug("Mapping customer to response: {}", customer);
-        return new CustomerResponse(
+        return new Customer(
                 customer.getId(),
                 customer.getFirstName(),
                 customer.getLastName(),
@@ -31,10 +24,10 @@ public final class CustomerMapper {
         );
     }
 
-    private static CreditProfileResponse mapCreditProfile(CreditProfile profile) {
+    private static CreditProfile mapCreditProfile(com.ezra.customerbackend.model.CreditProfile profile) {
         log.debug("Mapping credit profile to response: {}", profile);
         if (profile == null) return null;
-        return new CreditProfileResponse(
+        return new CreditProfile(
                 profile.getId(),
                 profile.getCreditLimit(),
                 profile.getOutstandingBalance(),
@@ -44,9 +37,9 @@ public final class CustomerMapper {
                 profile.getLastEvaluatedAt()
         );
     }
-    public static KycDocumentResponse toKycResponse(KycDocument doc) {
+    public static KycDocument toKycResponse(com.ezra.customerbackend.model.KycDocument doc) {
         log.debug("Mapping KYC document to response: {}", doc);
-        return new KycDocumentResponse(
+        return new KycDocument(
                 doc.getId(),
                 doc.getDocumentType(),
                 doc.getFileReference(),

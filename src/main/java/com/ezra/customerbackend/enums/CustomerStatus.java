@@ -1,8 +1,5 @@
 package com.ezra.customerbackend.enums;
 
-/**
- * Account lifecycle aligned with the customer-service flowchart.
- */
 public enum CustomerStatus {
     /** Registered; KYC not complete. */
     PENDING,

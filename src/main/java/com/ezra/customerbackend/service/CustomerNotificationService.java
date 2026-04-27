@@ -28,7 +28,7 @@ public class CustomerNotificationService implements CustomerNotificationPublishe
         Mono.fromRunnable(() -> {
                     boolean sent = streamBridge.send(bindingName, event);
                     if (!sent) {
-                        log.warn("StreamBridge returned false for binding={} customerId={}", bindingName, event.customerId());
+                        log.warn(" Error on binding={} customerId={}", bindingName, event.customerId());
                     }
                 })
                 .subscribeOn(Schedulers.boundedElastic())
