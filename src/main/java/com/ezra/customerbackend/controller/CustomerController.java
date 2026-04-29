@@ -83,7 +83,7 @@ public class CustomerController {
     @PostMapping("/{customerid}/kyc/approve")
     public Mono<ResponseEntity<ApiResponse<Customer>>> approveKyc(
             @PathVariable Long customerid,
-            @RequestHeader(value = "X-Reviewer", defaultValue = "system") String reviewer) {
+            @RequestHeader(value = "X-Reviewer") String reviewer) {
         return Mono.fromCallable(() -> customerApplicationService.approveKyc(customerid, reviewer))
                 .subscribeOn(Schedulers.boundedElastic())
                 .map(data -> ResponseEntity.ok(ApiResponse.ok("KYC approved successfully", data)));
