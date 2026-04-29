@@ -1,8 +1,6 @@
 package com.ezra.customerbackend.service;
 
-import com.ezra.customerbackend.notification.CustomerNotificationEvent;
-import com.ezra.customerbackend.notification.CustomerNotificationPublisher;
-import com.ezra.customerbackend.notification.NotificationRequest;
+import com.ezra.customerbackend.notification.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,8 +41,8 @@ public class CustomerNotificationService implements CustomerNotificationPublishe
                 UUID.randomUUID().toString(),
                 eventTime,
                 type,
-                new NotificationRequest.CustomerPayload(customerId),
-                new NotificationRequest.NotificationPayload(message, List.of("EMAIL"))
+                new Customer(customerId),
+                new Notification(message, List.of("EMAIL"))
         );
     }
 
